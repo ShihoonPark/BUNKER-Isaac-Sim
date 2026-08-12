@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs and temporary outputs
+logs/
+*.log
+*.tmp
+
+# External repositories / downloaded assets
+assets/ugv_gazebo_sim/
+
+# Isaac Sim generated/imported assets
+assets/bunker_mini_imported/
+
+# Large robotics data
+*.bag
+*.db3
+*.mcap
+*.pcd
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
