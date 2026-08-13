@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "description": "BUNKER MINI 2.0 V1 multi-contact tracked-plant surrogate. Measured geometry is separated from uncalibrated simulation assumptions.",
+  "measured_fixed": {
+    "source": "assets/ugv_gazebo_sim/bunker/bunker_mini/meshes/base_link.STL, reproduced by scripts/analyze_bunker_geometry.py; mass properties are from the Isaac Sim URDF import",
+    "vehicle_axes": {"forward": "X", "left": "+Y", "up": "+Z"},
+    "stl_bounds_m": {
+      "x_size": 0.692884,
+      "y_size": 0.564000,
+      "z_size": 0.330715,
+      "global_min_z": -0.274197
+    },
+    "track_width_m": 0.100000,
+    "left_track_center_y_m": 0.217000,
+    "right_track_center_y_m": -0.217000,
+    "track_center_distance_b_m": 0.434000,
+    "flat_contact_interval_x_m": [-0.229657, 0.210567],
+    "flat_contact_length_m": 0.440224,
+    "imported_mass_kg": 40.953842,
+    "imported_center_of_mass_m": [0.0026614994, -0.0000065175386, -0.09885404],
+    "imported_diagonal_inertia_kg_m2": [0.42803556, 1.2274561, 1.3801312],
+    "imported_principal_axes_wxyz": [0.99989074, 0.0000019928564, -0.014780267, 0.000003385873]
+  },
+  "reference_only": {
+    "manual_curb_mass_kg": 56.0,
+    "note": "Manual curb mass is a future calibration target, not used as V1 physical truth."
+  },
+  "derived_symmetry_overrides": {
+    "base_center_of_mass_m": [0.0026614994, 0.0, -0.09885404],
+    "base_principal_axes_wxyz": [0.99989074, 0.0, -0.014780267, 0.0],
+    "basis": "The imported STL-derived COM Y and principal-axis quaternion X/Z terms are tiny mirror-odd numerical residues. V1 zeros only those components to enforce exact left/right plant symmetry while preserving imported mass, diagonal inertia, COM X/Z, and the meaningful principal-axis Y rotation."
+  },
+  "tunable_assumptions": {
+    "roller_count_per_side": 5,
+    "roller_radius_method": "tile_flat_interval",
+    "roller_radius_scale": 1.0,
+    "roller_width_m": 0.094,
+    "roller_mass_kg_each": 0.05,
+    "drive_sign_by_side": {
+      "left": 1.0,
+      "right": 1.0,
+      "basis": "Both revolute axes are authored as +Y in the unrotated base frame. At the bottom contact, positive angular velocity gives surface velocity -X, so ground reaction drives the body +X."
+    },
+    "roller_dynamic_friction": 1.0,
+    "roller_static_friction": 1.0,
+    "roller_restitution": 0.0,
+    "drive_damping_n_m_s_per_rad": 20.0,
+    "max_drive_force_n_m": 35.0,
+    "contact_offset_m": 0.004,
+    "rest_offset_m": 0.0,
+    "chassis_collider": {
+      "method": "conservative_box_inside_measured_STL_bounds_above_rollers",
+      "size_m": [0.50, 0.32, 0.16],
+      "center_in_base_frame_m": [0.0, 0.0, -0.10]
+    },
+    "ground_dynamic_friction": 1.0,
+    "ground_static_friction": 1.0,
+    "ground_restitution": 0.0,
+    "physics_dt_s": 0.008333333333333333,
+    "solver_position_iterations": 16,
+    "solver_velocity_iterations": 4,
+    "spawn_clearance_m": 0.003,
+    "settle_duration_s": 1.0,
+    "test_duration_s": 4.0,
+    "notes": [
+      "All values in tunable_assumptions are initial numerical choices, not measured BUNKER properties.",
+      "Rollers are contact discretization elements and do not represent the real road-wheel count or belt-link geometry.",
+      "The radius is half of flat_contact_length / roller_count, so adjacent cylinders tile the measured flat interval in X.",
+      "Rigid rollers cannot reproduce belt compliance, grouser engagement, soil deformation, or continuous-track shear distribution.",
+      "The simplified chassis box can miss body-ground contacts made by the detailed shell.",
+      "Roller masses are subtracted from the imported base mass so total authored V1 mass remains the imported 40.953842 kg. Imported base inertia is retained as an approximation."
+    ]
+  },
+  "tests": {
+    "straight": {"v_cmd_m_s": 0.30, "omega_cmd_rad_s": 0.0},
+    "both_positive": {"v_left_m_s": 0.30, "v_right_m_s": 0.30},
+    "left_only": {"v_left_m_s": 0.30, "v_right_m_s": 0.0},
+    "right_only": {"v_left_m_s": 0.0, "v_right_m_s": 0.30},
+    "opposite": {"v_left_m_s": -0.1302, "v_right_m_s": 0.1302},
+    "opposite_reverse": {"v_left_m_s": 0.1302, "v_right_m_s": -0.1302},
+    "positive_in_place": {"v_cmd_m_s": 0.0, "omega_cmd_rad_s": 0.60},
+    "negative_in_place": {"v_cmd_m_s": 0.0, "omega_cmd_rad_s": -0.60},
+    "positive_curve": {"v_cmd_m_s": 0.25, "omega_cmd_rad_s": 0.45}
+  }
+}
