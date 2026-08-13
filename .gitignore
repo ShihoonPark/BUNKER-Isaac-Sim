@@ -24,3 +24,7 @@ assets/bunker_mini_imported/
 # OS / editor junk
 .DS_Store
 Thumbs.db
+
+# Local Isaac Sim inspection scenes (reference generated importer assets)
+scenes/bunker_import_inspection.usd
+scenes/tracked_force_plant_v2_flat_box_inspection.usd
