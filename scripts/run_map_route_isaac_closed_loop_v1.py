@@ -69,8 +69,14 @@ def _saturation_reasons(command: dict[str, float], controller_config: dict[str, 
   return "+".join(reasons) if reasons else "none"
 
 
+def _notify_observer(observer: Any | None, event: str, **payload: Any) -> None:
+  """Notify an optional read-only Stage-E observer without changing runtime state."""
+  if observer is not None:
+    getattr(observer, event)(**payload)
+
+
 def run_closed_loop(world: Any, plant_controller: Any, reference_rows: list[dict[str, Any]],
-                    configs: dict[str, Any], render: bool, realtime: bool
+                    configs: dict[str, Any], render: bool, realtime: bool, observer: Any | None = None
                     ) -> tuple[list[dict[str, Any]], dict[str, float], dict[str, Any]]:
   stage, controller_config, plant_config = configs["stage"], configs["controller"], configs["plant"]
   dt = float(plant_config["tunable_uncalibrated"]["physics_dt_s"])
@@ -93,6 +99,8 @@ def run_closed_loop(world: Any, plant_controller: Any, reference_rows: list[dict
              "z0_world_m": float(settled_state["position"][2]),
              "yaw0_world_rad": float(settled_state["yaw_wrapped_rad"])}
   plant_controller.reset({"v_cmd_m_s": 0.0, "omega_cmd_rad_s": 0.0})
+  _notify_observer(observer, "after_settle", world=world, settled=dict(settled),
+                   reference_rows=reference_rows)
 
   scheduler = DeadlineScheduler(control_period, float(stage["runtime"]["scheduler_time_tolerance_s"]))
   interpolator = ReferenceInterpolator(reference_rows)
@@ -193,6 +201,7 @@ def run_closed_loop(world: Any, plant_controller: Any, reference_rows: list[dict
       "skipped_tangent_contact_count": callback["skipped_tangent_contact_count"],
     })
     rows.append(row)
+    _notify_observer(observer, "after_logged_row", world=world, row=row)
 
   final_time = step_count * dt
   state = read_rigid_state(plant_controller)
@@ -224,6 +233,8 @@ def run_closed_loop(world: Any, plant_controller: Any, reference_rows: list[dict
     "v_cmd_m_s": held["v_cmd_m_s"], "omega_cmd_rad_s": held["omega_cmd_rad_s"],
     "v_left_cmd_m_s": held["v_left_cmd_m_s"], "v_right_cmd_m_s": held["v_right_cmd_m_s"],
     "command_scale": held["command_scale"]}
+  _notify_observer(observer, "after_run", world=world, rows=rows,
+                   final_observation=final_observation)
   return rows, settled, final_observation
 
 
