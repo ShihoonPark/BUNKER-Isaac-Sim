@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "description": "Stage C1 nominal closed-loop connection of Reference Trajectory V1, Tracking Controller V1, and the Isaac Sim V2 directional-force plant.",
+    "calibration_warning": "This is an uncalibrated simulation characterization. No real-robot equivalence is claimed."
+  },
+  "baseline_configs": {
+    "reference_trajectory": "config/reference_trajectory_v1.json",
+    "tracking_controller": "config/tracking_controller_v1.json",
+    "tracked_force_plant_v2": "config/experiments/tracked_force_plant_v2_tau_zero.json"
+  },
+  "runtime": {
+    "support_mode_required": "flat_track_boxes",
+    "creation_order": "normal",
+    "scheduler_time_tolerance_s": 1e-12,
+    "active_window_time_tolerance_s": 1e-12,
+    "saturation_scale_tolerance": 1e-12,
+    "custom_force_normal_tolerance_n": 1e-7,
+    "local_initial_pose_tolerance": 1e-9,
+    "detailed_contacts": false
+  },
+  "output": {
+    "default_directory": "logs/isaac_closed_loop_v1",
+    "stage_filename": "isaac_closed_loop_v1.usd",
+    "csv_filename": "nominal.csv",
+    "summary_filename": "summary.json",
+    "plot_filename": "isaac_closed_loop_v1.png"
+  }
+}
