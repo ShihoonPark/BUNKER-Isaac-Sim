@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Pure kinematic compatibility validation of Tracking Controller V1 with forward, reverse, transition, pivot, and maneuver-aware map references.",
+    "calibration_status": "Diagnostic validation only. Controller gains, limits, and reference preprocessing remain the merged uncalibrated simulation baselines."
+  },
+  "baseline_configs": {
+    "tracking_controller": "config/tracking_controller_v1.json",
+    "map_route_reference": "config/map_route_reference_v1.json"
+  },
+  "synthetic_references": {
+    "straight_speed_m_s": 0.30,
+    "straight_cruise_duration_s": 8.0,
+    "transition_stop_duration_s": 0.50,
+    "reverse_curve_speed_m_s": 0.30,
+    "reverse_curve_curvature_1_m": 0.50,
+    "pivot_angle_rad": 0.7853981633974483,
+    "pivot_duration_s": 3.0
+  },
+  "perturbations": {
+    "small_lateral_m": 0.05,
+    "large_lateral_m": 0.20,
+    "heading_deg": 10.0,
+    "full_route_lateral_m": 0.05,
+    "full_route_heading_deg": 3.0
+  },
+  "evaluation": {
+    "ordered_projection_half_window_segments": 60,
+    "early_window_s": 1.0,
+    "late_window_s": 1.0,
+    "saturation_tolerance": 1e-12,
+    "finite_difference_epsilon": 1e-7,
+    "growth_fit_min_error": 1e-6
+  },
+  "output": {
+    "default_directory": "logs/map_route_kinematic_validation_v1",
+    "summary_filename": "summary.json",
+    "plot_filename": "map_route_kinematic_validation_v1.png"
+  }
+}
