@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "description": "Single-factor curvature-transition-smoothing diagnostic derived from Reference Trajectory V1.",
+    "calibration_status": "Diagnostic simulation reference only; not a calibrated real-BUNKER trajectory."
+  },
+  "canonical_reference_config": "config/reference_trajectory_v1.json",
+  "smoothing": {
+    "method": "symmetric_linear_curvature_ramp",
+    "transition_heading_per_ramp_rad": 0.10,
+    "preserve_peak_curvature": true,
+    "preserve_global_start_goal": true,
+    "integration_method": "fixed-step_rk4_in_arc_length",
+    "integration_step_m": 0.001
+  }
+}
