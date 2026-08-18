@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Pure kinematic A/B validation of Direction-Aware Tracking Controller V2 against merged Controller V1 evidence.",
+    "calibration_status": "Diagnostic simulation validation only; no gain, limit, reference, or plant calibration changes."
+  },
+  "baseline_configs": {
+    "direction_aware_controller": "config/tracking_controller_v2_direction_aware.json",
+    "v1_kinematic_validation": "config/map_route_kinematic_validation_v1.json",
+    "map_route_reference": "config/map_route_reference_v1.json"
+  },
+  "output": {
+    "default_directory": "logs/map_route_kinematic_validation_v2",
+    "summary_filename": "summary.json",
+    "plot_filename": "map_route_kinematic_validation_v2.png"
+  }
+}
