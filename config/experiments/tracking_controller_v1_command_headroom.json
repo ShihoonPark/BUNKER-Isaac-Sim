@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "description": "Tracking Controller V1 validated against an exact kinematic unicycle plant.",
+    "calibration_status": "All controller gains and command limits are initial simulation assumptions, not real-robot calibrated values."
+  },
+  "measured_fixed": {
+    "source": "Measured from the actual BUNKER MINI STL geometry",
+    "track_center_distance_m": 0.434
+  },
+  "reference": {
+    "config_path": "config/reference_trajectory_v1.json"
+  },
+  "controller": {
+    "k_longitudinal_1_s": 1.0,
+    "k_lateral_rad_s_per_m": 1.5,
+    "k_heading_1_s": 2.0
+  },
+  "command_limits": {
+    "status": "Initial uncalibrated command-feasibility assumptions matching Reference Trajectory V1",
+    "maximum_abs_body_speed_m_s": 1.00,
+    "maximum_abs_yaw_rate_rad_s": 1.60,
+    "maximum_abs_track_surface_speed_m_s": 1.35
+  },
+  "simulation": {
+    "time_step_s": 0.02,
+    "terminal_hold_s": 3.0,
+    "near_zero_yaw_rate_rad_s": 1e-12,
+    "scenarios": {
+      "nominal": {"x_m": 0.0, "y_m": 0.0, "yaw_rad": 0.0},
+      "lateral_offset": {"x_m": 0.0, "y_m": 0.20, "yaw_rad": 0.0},
+      "heading_offset": {"x_m": 0.0, "y_m": 0.0, "yaw_deg": 10.0}
+    }
+  },
+  "validation": {
+    "floating_point_tolerance": 1e-10,
+    "nominal_max_active_rms_cross_track_error_m": 0.03,
+    "nominal_max_final_xy_error_m": 0.03,
+    "nominal_max_final_heading_error_rad": 0.03,
+    "terminal_max_abs_body_speed_m_s": 0.03,
+    "terminal_max_abs_yaw_rate_rad_s": 0.03,
+    "terminal_threshold_status": "Regression thresholds for the ideal kinematic baseline, not real-BUNKER performance requirements.",
+    "error_reduction_fraction": 0.50,
+    "early_window_s": 1.0,
+    "late_window_s": 1.0
+  },
+  "output": {
+    "default_directory": "logs/tracking_controller_v1",
+    "plot_filename": "tracking_controller_v1.png"
+  }
+}
