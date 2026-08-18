@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Stage D conversion of the recorded GLIM classroom traversal into a new spatially timed reference trajectory.",
+    "calibration_status": "Route preprocessing choices are initial Stage-D numerical assumptions, not real-robot calibrated parameters."
+  },
+  "source": {
+    "dataset": "slam_20260814_150626",
+    "mapping_method": "GLIM LiDAR-IMU 3D mapping using Velodyne VLP-32C and /imu/data",
+    "trajectory_path": "/home/a/Desktop/shihoon/glim_real/20260814_classroom/results/dump_150626_direct_20260814_222719/traj_lidar.txt",
+    "trajectory_format": "TUM: timestamp x y z qx qy qz qw",
+    "source_pose_frame": "velodyne",
+    "source_parent_frame": "GLIM world / ROS map",
+    "reference_center": "lidar_sensor_center",
+    "base_transform_status": "unknown"
+  },
+  "processing": {
+    "use_xy_only": true,
+    "preserve_traversal_order": true,
+    "artificial_loop_closure": false
+  },
+  "cleaning": {
+    "minimum_retained_xy_spacing_m": 0.010
+  },
+  "maneuver_segmentation": {
+    "status": "Initial Stage-D numerical assumptions; not real-robot calibrated maneuver thresholds",
+    "moving_interval_min_xy_m": 0.010,
+    "direction_basis": "recorded_yaw_forward_projection",
+    "pivot": {
+      "max_per_interval_xy_m": 0.010,
+      "minimum_consecutive_intervals": 3,
+      "minimum_abs_net_yaw_rad": 0.17453292519943295
+    }
+  },
+  "translational_geometry": {
+    "status": "Fixed diagnostic spatial scale; not a calibrated BUNKER curvature model",
+    "curvature_method": "fixed_arc_length_chord_and_three_point_circumcircle",
+    "half_span_m": 0.10
+  },
+  "resampling": {
+    "spacing_m": 0.020
+  },
+  "smoothing": {
+    "method": "one_pass_binomial_5point",
+    "weights": [1, 4, 6, 4, 1],
+    "normalization": 16,
+    "boundary_weights": [1, 2, 1],
+    "boundary_normalization": 4,
+    "wrap_closed_path": false
+  },
+  "diagnostic_guards": {
+    "maximum_rms_smoothing_displacement_m": 0.020,
+    "maximum_smoothing_displacement_m": 0.050,
+    "maximum_abs_path_length_change_percent": 2.0,
+    "quaternion_norm_tolerance": 0.01,
+    "known_source_pose_count": 867,
+    "known_raw_xy_length_m": 25.6533,
+    "known_raw_xy_length_tolerance_m": 0.01,
+    "known_start_end_distance_m": 0.09156,
+    "known_start_end_distance_tolerance_m": 0.002
+  },
+  "dynamic_limits_source": "config/reference_trajectory_v1.json",
+  "output": {
+    "default_directory": "logs/map_route_reference_v1",
+    "reference_filename": "reference.csv",
+    "summary_filename": "summary.json",
+    "geometry_plot_filename": "route_preprocessing.png",
+    "profile_plot_filename": "reference_profile.png"
+  }
+}
