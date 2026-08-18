@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Direction-Aware Tracking Controller V2: Controller V1 with one explicit maneuver-direction factor on lateral feedback.",
+    "calibration_status": "Diagnostic simulation controller only. Gains and feasibility limits are inherited unchanged from canonical Tracking Controller V1."
+  },
+  "baseline_controller_config": "config/tracking_controller_v1.json",
+  "motion_direction_policy": {
+    "forward": {
+      "motion_direction": 1,
+      "lateral_feedback_factor": 1
+    },
+    "reverse": {
+      "motion_direction": -1,
+      "lateral_feedback_factor": -1
+    },
+    "pivot": {
+      "motion_direction": 0,
+      "lateral_feedback_factor": 1,
+      "status": "Explicitly preserves Tracking Controller V1 pivot feedback; this is not sign(0)."
+    }
+  }
+}
