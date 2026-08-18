@@ -1,0 +1,79 @@
+{
+  "schema_version": 2,
+  "description": "BUNKER V2 single-rigid-body compound-contact plant with an explicit directional track-force law.",
+  "measured_fixed": {
+    "source": "BUNKER base_link STL measurements and existing Isaac Sim 5.1 URDF import",
+    "vehicle_axes": {"forward": "+X", "left": "+Y", "up": "+Z"},
+    "track_center_distance_b_m": 0.434,
+    "track_width_m": 0.100,
+    "left_track_center_y_m": 0.217,
+    "right_track_center_y_m": -0.217,
+    "flat_contact_interval_x_m": [-0.229657, 0.210567],
+    "flat_contact_length_m": 0.440224,
+    "stl_global_min_z_m": -0.274197,
+    "imported_mass_kg": 40.953842,
+    "imported_center_of_mass_m": [0.0026614994, -0.0000065175386, -0.09885404],
+    "imported_diagonal_inertia_kg_m2": [0.42803556, 1.2274561, 1.3801312],
+    "imported_principal_axes_wxyz": [0.99989074, 0.0000019928564, -0.014780267, 0.000003385873]
+  },
+  "reference_only": {
+    "manual_curb_mass_kg": 56.0,
+    "note": "Future calibration reference only; V2 retains the imported mass and inertia."
+  },
+  "tunable_uncalibrated": {
+    "support_mode": "flat_track_boxes",
+    "flat_track_box_thickness_m": 0.020,
+    "support_load_threshold_n": 10.0,
+    "contact_patch_count_per_side": 5,
+    "patch_shape": "cylinder_fixed_to_base",
+    "patch_radius_method": "tile_flat_interval",
+    "patch_radius_scale": 1.0,
+    "patch_width_m": 0.094,
+    "native_static_friction": 0.02,
+    "native_dynamic_friction": 0.02,
+    "native_restitution": 0.0,
+    "contact_offset_m": 0.004,
+    "rest_offset_m": 0.0,
+    "actuator_time_constant_s": 0.00,
+    "command_delay_s": 0.0,
+    "deadzone_m_s": 0.0,
+    "acceleration_limit_m_s2": 0.0,
+    "maximum_surface_speed_m_s": 1.5,
+    "k_long_n_per_m_s": 900.0,
+    "k_lat_n_per_m_s": 180.0,
+    "mu_long": 0.80,
+    "mu_lat": 0.18,
+    "maximum_track_force_n": 250.0,
+    "physics_dt_s": 0.008333333333333333,
+    "settle_duration_s": 1.0,
+    "test_duration_s": 4.0,
+    "spawn_clearance_m": 0.003,
+    "max_contact_count": 128,
+    "chassis_collider": {
+      "method": "conservative_box_inside_measured_STL_bounds_above_contact_patches",
+      "size_m": [0.50, 0.32, 0.16],
+      "center_in_base_frame_m": [0.0, 0.0, -0.10]
+    },
+    "future_normal_contact_stiffness_damping": null,
+    "notes": [
+      "Every value in tunable_uncalibrated is an initial simulation assumption, not a measured BUNKER parameter.",
+      "Low native friction preserves normal support while avoiding substantial double-counting of custom tangential forces.",
+      "A zero delay, deadzone, acceleration limit, or maximum track force disables that optional actuator feature.",
+      "The initial 250 N per-side force ceiling is an uncalibrated safety guard against impact-normal-load spikes, not an actuator measurement.",
+      "cylinders_legacy preserves the original fixed-cylinder support for A/B comparison; those cylinders do not represent real road wheels or belt links.",
+      "flat_track_boxes uses one non-overlapping physical support box per side; its 0.020 m thickness is a numerical support assumption, not a measured track thickness.",
+      "The five X patch centers remain virtual force/contact-classification bins in both support modes.",
+      "support_load_threshold_n is a numerical diagnostic assumption used to distinguish meaningful side support from negligible reported load."
+    ]
+  },
+  "tests": {
+    "settle_only": {"v_cmd_m_s": 0.0, "omega_cmd_rad_s": 0.0, "duration_s": 3.0, "disable_custom_forces": true},
+    "straight": {"v_cmd_m_s": 0.30, "omega_cmd_rad_s": 0.0},
+    "left_only": {"v_left_cmd_m_s": 0.30, "v_right_cmd_m_s": 0.0},
+    "right_only": {"v_left_cmd_m_s": 0.0, "v_right_cmd_m_s": 0.30},
+    "positive_in_place": {"v_cmd_m_s": 0.0, "omega_cmd_rad_s": 0.60},
+    "negative_in_place": {"v_cmd_m_s": 0.0, "omega_cmd_rad_s": -0.60},
+    "positive_curve": {"v_cmd_m_s": 0.25, "omega_cmd_rad_s": 0.45},
+    "negative_curve": {"v_cmd_m_s": 0.25, "omega_cmd_rad_s": -0.45}
+  }
+}
