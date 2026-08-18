@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Visualization-only overlay for the validated Stage-E GLIM classroom route closed loop.",
+    "calibration_warning": "XY alignment is data-derived. Point-cloud Z is display-only; physical LiDAR-to-base registration remains unresolved.",
+    "all_parameters_are_visualization_only": true
+  },
+  "stage_e_config": "config/map_route_isaac_closed_loop_v1.json",
+  "point_cloud_path": "/home/a/Desktop/shihoon/glim_real/20260814_classroom/results/classroom_150626.ply",
+  "raw_trajectory_path": "/home/a/Desktop/shihoon/glim_real/20260814_classroom/results/dump_150626_direct_20260814_222719/traj_lidar.txt",
+  "layers": {
+    "show_point_cloud": true,
+    "show_raw_glim_route": true,
+    "show_reference": true,
+    "show_actual_trail": true,
+    "show_start_end": true,
+    "show_pivot_markers": true
+  },
+  "display": {
+    "point_size_m": 0.025,
+    "raw_route_width_m": 0.012,
+    "reference_width_m": 0.025,
+    "actual_trail_width_m": 0.035,
+    "pivot_marker_radius_m": 0.070,
+    "endpoint_marker_radius_m": 0.090,
+    "reference_visual_z_m": 0.030,
+    "actual_visual_z_m": 0.055,
+    "map_visual_z_offset_m": 0.0,
+    "actual_trail_update_period_s": 0.10,
+    "actual_trail_minimum_spacing_m": 0.005
+  },
+  "camera": {
+    "overview_camera_enabled": true,
+    "bounds_padding_fraction": 0.10,
+    "height_scale": 1.35
+  },
+  "output": {
+    "default_directory": "logs/map_route_visualization_v1",
+    "stage_filename": "map_route_visualization_v1.usd",
+    "csv_filename": "nominal.csv",
+    "summary_filename": "summary.json",
+    "plot_filename": "map_route_visualization_v1.png"
+  }
+}
