@@ -265,11 +265,12 @@ def summarize(rows: list[dict[str, Any]], reference_rows: list[dict[str, Any]], 
   intervals = [right - left for left, right in zip(update_times, update_times[1:])]
   lateness = [float(row["control_update_lateness_s"]) for row in updates]
   modes = {1: "forward", -1: "reverse", 0: "pivot"}
+  segment_ids = sorted({int(row["reference_segment_id"]) for row in active})
   dt = float(plant["tunable_uncalibrated"]["physics_dt_s"])
   mode_metrics = {name: metric_block([row for row in active if int(row["reference_motion_direction"]) == direction], scale_tolerance, dt)
                   for direction, name in modes.items()}
   segments = {}
-  for segment_id in range(23):
+  for segment_id in segment_ids:
     selected = [row for row in active if int(row["reference_segment_id"]) == segment_id]
     metrics = metric_block(selected, scale_tolerance, dt)
     metrics.update({"mode": modes[int(selected[0]["reference_motion_direction"])],
@@ -306,7 +307,9 @@ def summarize(rows: list[dict[str, Any]], reference_rows: list[dict[str, Any]], 
   actuator_ceiling = float(plant["tunable_uncalibrated"]["maximum_surface_speed_m_s"])
   result = {
     "source_config_paths": stage["baseline_configs"], "reference_duration_s": reference_end,
-    "reference_path_length_m": float(reference_rows[-1]["s_m"]), "reference_segment_counts": {"forward": 10, "reverse": 9, "pivot": 4},
+    "reference_path_length_m": float(reference_rows[-1]["s_m"]),
+    "reference_segment_counts": {name: len({int(row["segment_id"]) for row in reference_rows
+      if int(row["motion_direction"]) == direction}) for direction, name in modes.items()},
     "reference_signed_speed_range_m_s": [min(float(row["v_ref_m_s"]) for row in reference_rows), max(float(row["v_ref_m_s"]) for row in reference_rows)],
     "physics_timestep_s": dt, "controller_target_period_s": float(controller["simulation"]["time_step_s"]),
     "terminal_hold_s": float(controller["simulation"]["terminal_hold_s"]),
@@ -428,6 +431,10 @@ def main() -> int:
     rows, settled, final = run_closed_loop(world, plant_controller, reference_result["trajectory"], configs, args.gui, args.realtime)
     summary = summarize(rows, reference_result["trajectory"], configs, settled, final, kinematic_summary)
     summary["stage_config_path"] = str(stage_path); summary["plant_build"] = build_info
+    dataset_source = stage.get("metadata", {}).get("dataset_source")
+    if dataset_source:
+      with (REPO_ROOT / dataset_source).open(encoding="utf-8") as stream:
+        summary["dataset_provenance"] = json.load(stream)
     csv_path = output_dir / stage["output"]["csv_filename"]
     summary_path = output_dir / stage["output"]["summary_filename"]
     write_csv(csv_path, rows)

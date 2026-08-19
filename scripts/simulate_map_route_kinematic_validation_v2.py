@@ -237,7 +237,8 @@ def run(config_path: Path, output_dir: Path) -> tuple[dict[str, Any], dict[str, 
                        "finite_difference_jacobian": finite_difference_jacobian(speed, direction, controller_config, epsilon),
                        "eigenvalues_1_s": eigenvalues(speed, direction, controller_config)}
   segment_ab = {}
-  for segment_id in range(23):
+  segment_ids = sorted({int(row["segment_id"]) for row in map_result["trajectory"]})
+  for segment_id in segment_ids:
     before = v1_summary["map_nominal"]["segment_metrics"][str(segment_id)]
     after = v2_summary["map_nominal"]["segment_metrics"][str(segment_id)]
     segment_ab[str(segment_id)] = {"mode": after["segment_type"],

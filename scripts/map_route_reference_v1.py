@@ -54,6 +54,11 @@ def load_config(path: Path) -> dict[str, Any]:
       "fixed_arc_length_chord_and_three_point_circumcircle" or
       float(config["translational_geometry"]["half_span_m"]) <= 0.0):
     raise MapRouteError("invalid translational geometry estimator")
+  policy = config["translational_geometry"].get("pivot_boundary_yaw_policy")
+  if policy is not None and (policy["method"] !=
+      "recorded_yaw_fallback_when_full_boundary_stencil_unavailable" or
+      float(policy["required_support_half_span_multiplier"]) <= 0.0):
+    raise MapRouteError("invalid pivot-boundary yaw policy")
   return config
 
 
@@ -527,7 +532,8 @@ def _signed_pointwise_limits(rows: list[dict[str, Any]], canonical: dict[str, An
 
 
 def build_translational_reference(segment: dict[str, Any], source: list[dict[str, Any]],
-                                  config: dict[str, Any], canonical: dict[str, Any]
+                                  config: dict[str, Any], canonical: dict[str, Any],
+                                  pivot_adjacent: bool = False
                                   ) -> list[dict[str, Any]]:
   direction = 1 if segment["mode"] == "FORWARD" else -1
   subset = source[int(segment["source_index_start"]):int(segment["source_index_end"]) + 1]
@@ -537,9 +543,27 @@ def build_translational_reference(segment: dict[str, Any], source: list[dict[str
   smoothed = smooth_open_route(uniform)
   geometry = _fixed_scale_geometry(
     smoothed, float(config["translational_geometry"]["half_span_m"]), direction)
+  policy = config["translational_geometry"].get("pivot_boundary_yaw_policy", {})
+  required_support = (float(config["translational_geometry"]["half_span_m"]) *
+                      float(policy.get("required_support_half_span_multiplier", 2.0)))
+  available_support = float(geometry[-1]["s_m"])
+  fallback = bool(policy.get("enabled", False) and pivot_adjacent and
+                  available_support + 1e-12 < required_support)
+  if fallback:
+    # source has already been unwrapped globally by assemble_maneuver_reference;
+    # using those endpoint branches prevents local [-pi, pi] segment resets.
+    yaw_start = float(subset[0]["recorded_yaw_rad"])
+    yaw_end = float(subset[-1]["recorded_yaw_rad"])
+    for row in geometry:
+      fraction = 0.0 if available_support <= 1e-12 else float(row["s_m"]) / available_support
+      row["yaw_rad"] = yaw_start + fraction * (yaw_end - yaw_start)
   for row in geometry:
     row.update({"segment_id": int(segment["segment_id"]), "segment_type": segment["mode"].lower(),
-                "segment_index": int(segment["segment_id"])})
+                "segment_index": int(segment["segment_id"]),
+                "pivot_boundary_yaw_method": "RECORDED_YAW_FALLBACK" if fallback else "GEOMETRIC",
+                "pivot_boundary_available_support_m": available_support,
+                "pivot_boundary_required_support_m": required_support,
+                "pivot_boundary_geometric_reliable": int(available_support + 1e-12 >= required_support)})
   _signed_pointwise_limits(geometry, canonical, direction)
   profile_config = canonical
   if direction < 0:
@@ -642,10 +666,13 @@ def assemble_maneuver_reference(segments: list[dict[str, Any]], source: list[dic
   source_guided = [dict(row, recorded_yaw_rad=recorded_all[index])
                    for index, row in enumerate(source)]
   translational: dict[int, list[dict[str, Any]]] = {}
+  pivot_ids = {int(segment["segment_id"]) for segment in segments if segment["mode"] == "PIVOT"}
   for segment in segments:
     if segment["mode"] != "PIVOT":
+      segment_id = int(segment["segment_id"])
       translational[int(segment["segment_id"])] = build_translational_reference(
-        segment, source_guided, config, canonical)
+        segment, source_guided, config, canonical,
+        pivot_adjacent=(segment_id - 1 in pivot_ids or segment_id + 1 in pivot_ids))
   pieces = []
   pivot_reports = []
   for index, segment in enumerate(segments):
@@ -657,6 +684,22 @@ def assemble_maneuver_reference(segments: list[dict[str, Any]], source: list[dic
     yaw_entry = float(previous_rows[-1]["yaw_rad"]) if previous_rows else recorded_all[int(segment["source_index_start"])]
     yaw_exit = float(next_rows[0]["yaw_rad"]) if next_rows else recorded_all[int(segment["source_index_end"])]
     pivot_rows, report = build_pivot_reference(segment, source, yaw_entry, yaw_exit, canonical)
+    source_entry = recorded_all[int(segment["source_index_start"])]
+    source_exit = recorded_all[int(segment["source_index_end"])]
+    report.update({
+      "source_entry_yaw_rad": source_entry, "source_exit_yaw_rad": source_exit,
+      "reference_entry_yaw_rad": yaw_entry,
+      "reference_exit_yaw_rad": yaw_entry + float(report["reference_yaw_change_rad"]),
+      "entry_boundary_method": (str(previous_rows[-1]["pivot_boundary_yaw_method"])
+                                if previous_rows else "RECORDED_YAW_FALLBACK"),
+      "exit_boundary_method": (str(next_rows[0]["pivot_boundary_yaw_method"])
+                               if next_rows else "RECORDED_YAW_FALLBACK"),
+      "entry_boundary_reason": ("full fixed-scale boundary stencil available" if previous_rows and
+        int(previous_rows[-1]["pivot_boundary_geometric_reliable"]) else
+        "adjacent translation lacks full fixed-scale boundary stencil"),
+      "exit_boundary_reason": ("full fixed-scale boundary stencil available" if next_rows and
+        int(next_rows[0]["pivot_boundary_geometric_reliable"]) else
+        "adjacent translation lacks full fixed-scale boundary stencil")})
     segment.update({"pivot_reference": report}); pivot_reports.append({"segment_id": segment_id, **report})
     pieces.append(pivot_rows)
   combined = []

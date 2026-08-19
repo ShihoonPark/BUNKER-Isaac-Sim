@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "One nominal Isaac Stage-E-style run for the accepted Bag D route in the Bag C map.",
+    "calibration_warning": "LiDAR-center XY integration validation only; no simulator-real equivalence or terrain interpretation is claimed.",
+    "dataset_source": "config/datasets/bag_cd_20260819_localized_route.json"
+  },
+  "baseline_configs": {
+    "map_route_reference": "config/latest_real_localization_reference_v1.json",
+    "direction_aware_controller": "config/tracking_controller_v2_direction_aware.json",
+    "tracked_force_plant_v2": "config/tracked_force_plant_v2.json"
+  },
+  "comparison": {"kinematic_v2_summary": "logs/latest_real_localization_kinematic_v1/summary.json",
+                 "kinematic_scenario": "map_nominal"},
+  "runtime": {
+    "support_mode_required": "flat_track_boxes", "creation_order": "normal",
+    "scheduler_time_tolerance_s": 1e-12, "active_window_time_tolerance_s": 1e-12,
+    "saturation_scale_tolerance": 1e-12, "custom_force_normal_tolerance_n": 1e-7,
+    "local_initial_pose_tolerance": 1e-9, "ordered_projection_half_window_segments": 60,
+    "detailed_contacts": false, "force_guard_near_fraction": 0.99,
+    "actuator_ceiling_tolerance_m_s": 1e-9
+  },
+  "output": {
+    "default_directory": "logs/latest_real_localization_isaac_v1",
+    "stage_filename": "latest_real_localization_isaac_v1.usd", "csv_filename": "nominal.csv",
+    "summary_filename": "summary.json", "plot_filename": "latest_real_localization_isaac_v1.png"
+  }
+}

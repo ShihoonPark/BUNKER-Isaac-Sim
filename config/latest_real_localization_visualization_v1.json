@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Visualization-only Bag C map, accepted Bag D route, processed reference, and Isaac actual trail.",
+    "calibration_warning": "XY alignment is map-frame-derived; map Z is display-only and T_base_lidar remains unknown.",
+    "all_parameters_are_visualization_only": true,
+    "dataset_source": "config/datasets/bag_cd_20260819_localized_route.json"
+  },
+  "stage_e_config": "config/latest_real_localization_isaac_v1.json",
+  "point_cloud_path": "/home/a/Desktop/shihoon/glim_real/20260819_flat/results/flat_bag_C_imu_on.ply",
+  "raw_trajectory_path": "/home/a/Desktop/shihoon/bunker_localization_ws/results/bag_D_flat_20260819_localization_full/estimated_traj_lidar.tum",
+  "layers": {"show_point_cloud": true, "show_raw_glim_route": true, "show_reference": true,
+             "show_actual_trail": true, "show_start_end": true, "show_pivot_markers": true},
+  "display": {
+    "point_size_m": 0.025, "raw_route_width_m": 0.012, "reference_width_m": 0.025,
+    "actual_trail_width_m": 0.035, "pivot_marker_radius_m": 0.070,
+    "endpoint_marker_radius_m": 0.090, "reference_visual_z_m": 0.030,
+    "actual_visual_z_m": 0.055, "map_visual_z_offset_m": 0.0,
+    "actual_trail_update_period_s": 0.10, "actual_trail_minimum_spacing_m": 0.005
+  },
+  "camera": {"overview_camera_enabled": true, "bounds_padding_fraction": 0.10, "height_scale": 1.35},
+  "output": {
+    "default_directory": "logs/latest_real_localization_visualization_v1",
+    "stage_filename": "latest_real_localization_visualization_v1.usd", "csv_filename": "nominal.csv",
+    "summary_filename": "summary.json", "plot_filename": "latest_real_localization_visualization_v1.png"
+  }
+}

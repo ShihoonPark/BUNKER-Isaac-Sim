@@ -204,13 +204,14 @@ class MapRouteVisualizationObserver:
       path = self.ROOT_PATH + "/RawGLIMTraversal"; self._curve(stage, path, raw_points, float(display["raw_route_width_m"]), (.30, .72, .78)); self.prim_paths.append(path)
     if layers["show_reference"]:
       colors = {1: (.15, .85, .20), -1: (1.0, .48, .05), 0: (.90, .10, .85)}
-      for segment_id in range(23):
+      segment_ids = sorted({int(row["segment_id"]) for row in reference_rows})
+      for segment_id in segment_ids:
         selected = [row for row in reference_rows if int(row["segment_id"]) == segment_id]
         points = [(float(row["x_m"]), float(row["y_m"]), float(display["reference_visual_z_m"])) for row in selected]
         path = self.ROOT_PATH + f"/Reference/Segment_{segment_id:02d}"
         self._curve(stage, path, points, float(display["reference_width_m"]), colors[int(selected[0]["motion_direction"])]); self.prim_paths.append(path)
     if layers["show_pivot_markers"]:
-      for segment_id in range(23):
+      for segment_id in segment_ids:
         selected = [row for row in reference_rows if int(row["segment_id"]) == segment_id and int(row["motion_direction"]) == 0]
         if not selected: continue
         middle = selected[len(selected) // 2]; path = self.ROOT_PATH + f"/PivotMarkers/Pivot_{segment_id:02d}"
