@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "One nominal exact-kinematic Controller V2 gate for the latest Bag C/D route.",
+    "calibration_status": "Validation only; no controller tuning."
+  },
+  "baseline_configs": {
+    "direction_aware_controller": "config/tracking_controller_v2_direction_aware.json",
+    "v1_kinematic_validation": "config/map_route_kinematic_validation_v1.json",
+    "map_route_reference": "config/latest_real_localization_reference_v1.json"
+  },
+  "output": {"default_directory": "logs/latest_real_localization_kinematic_v1",
+             "summary_filename": "summary.json", "csv_filename": "map_nominal.csv"}
+}

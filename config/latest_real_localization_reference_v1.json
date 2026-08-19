@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Maneuver-aware reference from accepted Bag D localization poses in the Bag C map frame.",
+    "calibration_status": "Existing-data synchronization only; preprocessing remains the unchanged Stage-D numerical baseline.",
+    "dataset_source": "config/datasets/bag_cd_20260819_localized_route.json"
+  },
+  "source": {
+    "dataset": "bag_D_flat_independent_localization",
+    "mapping_method": "Bag C GLIM dense map + Bag D accepted independent localization (coarse relocalization, EKF prediction, full-6DoF small_gicp correction/gate)",
+    "trajectory_path": "/home/a/Desktop/shihoon/bunker_localization_ws/results/bag_D_flat_20260819_localization_full/estimated_traj_lidar.tum",
+    "trajectory_format": "TUM: timestamp x y z qx qy qz qw",
+    "source_pose_frame": "velodyne",
+    "source_parent_frame": "map",
+    "reference_center": "lidar_sensor_center",
+    "base_transform_status": "unknown",
+    "map_dataset": "Bag C — flat dense mapping",
+    "map_artifact": "/home/a/Desktop/shihoon/glim_real/20260819_flat/results/flat_bag_C_imu_on.ply",
+    "localization_dataset": "Bag D — flat independent localization",
+    "accepted_pose_count": 2176,
+    "full_lidar_input_count": 2181,
+    "localization_acceptance_fraction": 0.9977074736359468,
+    "pose_semantics": "T_map_lidar",
+    "vertical_deformation_status": "unresolved; visualization only"
+  },
+  "processing": {"use_xy_only": true, "preserve_traversal_order": true, "artificial_loop_closure": false},
+  "cleaning": {"minimum_retained_xy_spacing_m": 0.010},
+  "maneuver_segmentation": {
+    "status": "Unchanged Stage-D numerical assumptions; not real-robot calibrated maneuver thresholds",
+    "moving_interval_min_xy_m": 0.010,
+    "direction_basis": "recorded_yaw_forward_projection",
+    "pivot": {"max_per_interval_xy_m": 0.010, "minimum_consecutive_intervals": 3,
+              "minimum_abs_net_yaw_rad": 0.17453292519943295}
+  },
+  "translational_geometry": {
+    "status": "Unchanged fixed diagnostic spatial scale; not a calibrated BUNKER curvature model",
+    "curvature_method": "fixed_arc_length_chord_and_three_point_circumcircle",
+    "half_span_m": 0.10,
+    "pivot_boundary_yaw_policy": {
+      "method": "recorded_yaw_fallback_when_full_boundary_stencil_unavailable",
+      "enabled": true,
+      "required_support_half_span_multiplier": 2.0,
+      "scope": "pivot-adjacent translational maneuvers only",
+      "fallback_interpolation": "continuous unwrapped source boundary yaw over segment progress"
+    }
+  },
+  "resampling": {"spacing_m": 0.020},
+  "smoothing": {
+    "method": "one_pass_binomial_5point", "weights": [1, 4, 6, 4, 1], "normalization": 16,
+    "boundary_weights": [1, 2, 1], "boundary_normalization": 4, "wrap_closed_path": false
+  },
+  "diagnostic_guards": {
+    "maximum_rms_smoothing_displacement_m": 0.020,
+    "maximum_smoothing_displacement_m": 0.050,
+    "maximum_abs_path_length_change_percent": 2.0,
+    "quaternion_norm_tolerance": 0.01,
+    "known_source_pose_count": 2176,
+    "known_raw_xy_length_m": 72.32224028081875,
+    "known_raw_xy_length_tolerance_m": 0.001,
+    "known_start_end_distance_m": 0.4740934255018521,
+    "known_start_end_distance_tolerance_m": 0.001
+  },
+  "dynamic_limits_source": "config/reference_trajectory_v1.json",
+  "output": {
+    "default_directory": "logs/latest_real_localization_reference_v1",
+    "reference_filename": "reference.csv", "summary_filename": "summary.json",
+    "geometry_plot_filename": "route_preprocessing.png", "profile_plot_filename": "reference_profile.png"
+  }
+}

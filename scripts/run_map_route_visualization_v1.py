@@ -85,6 +85,10 @@ def main() -> int:
       "limitations": ["GLIM cloud and T_map_lidar route share the map frame.",
                       "Reference is LiDAR sensor-center-derived while Isaac tracks body/base; exact T_base_lidar is unknown.",
                       "PLY has no collision role and its Z is not a validated terrain model."]}
+    dataset_source = visual.get("metadata", {}).get("dataset_source")
+    if dataset_source:
+      with (REPO_ROOT / dataset_source).open(encoding="utf-8") as stream:
+        summary["dataset_provenance"] = json.load(stream)
     summary["plant_build"] = build_info
     write_csv(output_dir / visual["output"]["csv_filename"], rows)
     with (output_dir / visual["output"]["summary_filename"]).open("w", encoding="utf-8") as stream:

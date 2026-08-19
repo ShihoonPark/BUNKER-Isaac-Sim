@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "dataset_name": "bag_cd_20260819_localized_route",
+  "mapping": {
+    "dataset": "Bag C — flat dense mapping",
+    "map_artifact": "/home/a/Desktop/shihoon/glim_real/20260819_flat/results/flat_bag_C_imu_on.ply",
+    "map_frame": "map",
+    "method": "GLIM LiDAR-IMU dense mapping"
+  },
+  "localization": {
+    "dataset": "Bag D — flat independent localization",
+    "accepted_trajectory_artifact": "/home/a/Desktop/shihoon/bunker_localization_ws/results/bag_D_flat_20260819_localization_full/estimated_traj_lidar.tum",
+    "trajectory_format": "TUM: timestamp x y z qx qy qz qw",
+    "parent_frame": "map",
+    "child_frame": "velodyne",
+    "pose_semantics": "T_map_lidar; p_map = T_map_lidar * p_lidar",
+    "source_type": "accepted independent localization",
+    "method_provenance": "coarse global relocalization + EKF planar relative-motion prediction + full-6DoF small_gicp correction/gate",
+    "prediction_poses_in_route": false,
+    "rejected_scans_in_route": false,
+    "accepted_pose_count": 2176,
+    "full_lidar_input_count": 2181,
+    "acceptance_fraction": 0.9977074736359468
+  },
+  "processing_policy": {
+    "use_xy_only": true,
+    "preserve_traversal_order": true,
+    "artificial_loop_closure": false,
+    "t_base_lidar_status": "unknown",
+    "vertical_map_status": "unresolved; visualization only"
+  },
+  "external_real_robot_observation_not_applied": {
+    "description": "Low-speed mixed-command deadzone candidate; documentation only, not applied to simulator parameters.",
+    "no_motion_observed": {"v_m_s": 0.08, "omega_rad_s": -0.15},
+    "motion_observed": {"v_m_s": 0.12, "omega_rad_s": -0.15}
+  }
+}
