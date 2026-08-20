@@ -18,6 +18,8 @@ Isaac Sim based simulation, trajectory planning, and control project for the Agi
 - Base physics scene created
 - AgileX BUNKER MINI URDF/STL asset inspected and imported into Isaac Sim
 - Stable V2 directional-force tracked-plant baseline validated in Isaac Sim/PhysX
+- Latest Bag C dense-map and accepted Bag D localization sync validated
+- Direction-Aware Controller V2 and the Multiple Closed-Loop Global Path Demo V1 validated
 
 ## Project Structure
 
@@ -25,7 +27,8 @@ Isaac Sim based simulation, trajectory planning, and control project for the Agi
 isaac_bunker_project/
 ├── config/
 │   ├── tracked_plant_v1.json
-│   └── tracked_force_plant_v2.json
+│   ├── tracked_force_plant_v2.json
+│   └── global_path_demo_v1.json
 ├── scenes/
 │   └── base_physics.usd
 ├── scripts/
@@ -34,6 +37,10 @@ isaac_bunker_project/
 │   ├── build_tracked_force_plant_v2.py
 │   ├── track_force_model_v2.py
 │   ├── test_tracked_force_plant_v2.py
+│   ├── global_path_demo_v1.py
+│   ├── global_path_demo_visualization_v1.py
+│   ├── run_global_path_demo_v1.py
+│   ├── test_global_path_demo_v1.py
 │   └── run_isaac.sh
 ├── assets/
 └── logs/
@@ -91,6 +98,37 @@ These results validate the current simulator structure; they are not a real-robo
 - Full suite: `straight`, `left_only`, `right_only`, `positive_in_place`, `negative_in_place`, `positive_curve`, and `negative_curve` passed. Authoring-order invariance passed with zero final-pose difference.
 
 V2 is an uncalibrated but structurally stable Isaac Sim tracked-plant baseline. Actuator lag, longitudinal traction, lateral skid/friction, force limits, and left/right bias must later be calibrated from measurements of the real BUNKER.
+
+## Multiple Closed-Loop Global Path Demo V1
+
+This stage provides three deterministic, manually authored closed paths on the latest Bag C classroom-map context: `rounded_loop`, `zigzag_loop`, and `lawnmower_loop`. It is a Manual Global Path Provider, not an A*, RRT, or coverage planner. Every preset uses the same `0.45 m` circular corner fillet, canonical trajectory limits, Direction-Aware Controller V2, and tracked-force plant V2; no path-specific gains or plant parameters are used.
+
+The default execution is two laps. It launches from rest, crosses the interior lap boundary on the steady periodic speed profile without stopping, and stops only after the final lap. The GUI is observer-only: Bag C points are gray, the manual global path is cyan, the velocity-aware reference is green, the Isaac trajectory is yellow, and the lap status appears in a small window and as USD attributes.
+
+Run the primary rounded-loop GUI demo in real time:
+
+~~~bash
+env -u PYTHONPATH -u LD_LIBRARY_PATH -u ROS_DISTRO -u AMENT_PREFIX_PATH -u CMAKE_PREFIX_PATH \
+  /home/a/isaacsim/python.sh scripts/run_global_path_demo_v1.py \
+  --path rounded_loop --gui --realtime --plot
+~~~
+
+Run the other presets headlessly:
+
+~~~bash
+env -u PYTHONPATH -u LD_LIBRARY_PATH -u ROS_DISTRO -u AMENT_PREFIX_PATH -u CMAKE_PREFIX_PATH \
+  /home/a/isaacsim/python.sh scripts/run_global_path_demo_v1.py --path zigzag_loop --plot
+env -u PYTHONPATH -u LD_LIBRARY_PATH -u ROS_DISTRO -u AMENT_PREFIX_PATH -u CMAKE_PREFIX_PATH \
+  /home/a/isaacsim/python.sh scripts/run_global_path_demo_v1.py --path lawnmower_loop --plot
+~~~
+
+For the exact-unicycle gate, add `--kinematic` and use system Python. Check all saved nominal outputs with:
+
+~~~bash
+python3 scripts/test_global_path_demo_v1.py --require-kinematic --require-isaac
+~~~
+
+Outputs are written below the ignored `logs/global_path_demo_v1/<preset>/` directories. Passing this demo validates deterministic integration and nominal tracking in the current simulator; it does not establish real-robot calibration or simulator-to-real equivalence.
 
 ## Run the V2 Plant
 

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Three deterministic manual closed-loop global paths on the latest Bag C classroom map.",
+    "provider_semantics": "Manual Global Path Provider only; this is not A*, RRT, or a coverage planner.",
+    "calibration_warning": "Demo integration validation only; no controller, plant, or real-robot calibration is claimed.",
+    "map_frame": "map",
+    "map_usage": "XY planar visualization and observed-coverage context only; PLY Z is not terrain ground truth."
+  },
+  "baseline_configs": {
+    "trajectory_limits": "config/reference_trajectory_v1.json",
+    "direction_aware_controller": "config/tracking_controller_v2_direction_aware.json",
+    "v1_kinematic_validation": "config/map_route_kinematic_validation_v1.json",
+    "tracked_force_plant_v2": "config/tracked_force_plant_v2.json"
+  },
+  "map": {
+    "point_cloud_path": "/home/a/Desktop/shihoon/glim_real/20260819_flat/results/flat_bag_C_imu_on.ply",
+    "expected_raw_point_count": 11215,
+    "measured_ply_xy_bounds_m": {
+      "x": [-5.64574670791626, 6.766557693481445],
+      "y": [-3.5818092823028564, 8.546086311340332]
+    },
+    "accepted_bag_d_xy_sanity_bounds_m": {
+      "x": [0.5028346059088286, 4.67607134329824],
+      "y": [0.48960521132904533, 7.215114693130031]
+    },
+    "waypoint_policy": "Manual points lie inside the Bag C observed classroom and use the accepted Bag D bounds only as a free-space/coverage sanity envelope; no Bag D pose is copied."
+  },
+  "geometry": {
+    "closed": true,
+    "corner_smoothing_method": "constant_radius_circular_fillet",
+    "corner_radius_m": 0.45,
+    "resampling_interval_m": 0.02,
+    "minimum_straight_between_fillets_m": 0.05,
+    "duplicate_distance_tolerance_m": 1e-10,
+    "curvature_near_zero_epsilon_1_m": 1e-9
+  },
+  "execution": {
+    "default_laps": 2,
+    "launch_speed_m_s": 0.0,
+    "final_speed_m_s": 0.0,
+    "projection_half_window_segments": 60,
+    "support_mode_required": "flat_track_boxes",
+    "creation_order": "normal",
+    "scheduler_time_tolerance_s": 1e-12,
+    "active_window_time_tolerance_s": 1e-12,
+    "saturation_scale_tolerance": 1e-12,
+    "custom_force_normal_tolerance_n": 1e-7,
+    "detailed_contacts": false
+  },
+  "evaluation": {
+    "straight_curvature_threshold_1_m": 1e-6,
+    "straight_minimum_speed_m_s": 0.15,
+    "oscillation_zero_deadband_m": 0.002,
+    "projection_backward_numerical_tolerance_m": 1e-5,
+    "kinematic_maximum_rms_cte_m": 0.08,
+    "kinematic_maximum_abs_cte_m": 0.25,
+    "kinematic_maximum_rms_heading_rad": 0.12,
+    "kinematic_maximum_abs_heading_rad": 0.45,
+    "kinematic_maximum_rms_progress_error_m": 0.20,
+    "kinematic_maximum_abs_progress_error_m": 0.60,
+    "isaac_maximum_rms_cte_m": 0.20,
+    "isaac_maximum_abs_cte_m": 0.55,
+    "isaac_maximum_rms_heading_rad": 0.35,
+    "isaac_maximum_abs_heading_rad": 1.05,
+    "isaac_maximum_rms_progress_error_m": 0.45,
+    "isaac_maximum_abs_progress_error_m": 1.20,
+    "lap2_maximum_cte_growth_factor": 2.0,
+    "lap_growth_absolute_floor_m": 0.02
+  },
+  "visualization": {
+    "point_size_m": 0.025,
+    "global_path_width_m": 0.012,
+    "reference_width_m": 0.030,
+    "actual_trail_width_m": 0.040,
+    "start_marker_radius_m": 0.09,
+    "reference_visual_z_m": 0.04,
+    "actual_visual_z_m": 0.065,
+    "actual_trail_update_period_s": 0.10,
+    "actual_trail_minimum_spacing_m": 0.005,
+    "camera_bounds_padding_fraction": 0.10,
+    "camera_height_scale": 1.35
+  },
+  "presets": {
+    "rounded_loop": {
+      "closed": true,
+      "intent": "Long straights and four rounded corners for the repeat-loop baseline.",
+      "waypoints_map_xy_m": [[1.0, 1.0], [4.2, 1.0], [4.2, 6.7], [1.0, 6.7]]
+    },
+    "zigzag_loop": {
+      "closed": true,
+      "intent": "Alternating heading transitions followed by a separate left-side return leg.",
+      "waypoints_map_xy_m": [[0.8, 0.8], [4.2, 0.8], [1.3, 2.2], [4.2, 3.5], [1.3, 4.8], [4.2, 6.2], [0.8, 6.8]]
+    },
+    "lawnmower_loop": {
+      "closed": true,
+      "intent": "Parallel serpentine traversals with rounded connectors and a separate left-side return leg.",
+      "waypoints_map_xy_m": [[1.2, 1.0], [4.2, 1.0], [4.2, 2.4], [1.5, 2.4], [1.5, 3.8], [4.2, 3.8], [4.2, 5.2], [1.5, 5.2], [1.5, 6.6], [0.5, 6.6], [0.5, 1.0]]
+    }
+  },
+  "output": {
+    "default_directory": "logs/global_path_demo_v1",
+    "kinematic_csv_filename": "kinematic.csv",
+    "kinematic_summary_filename": "kinematic_summary.json",
+    "isaac_csv_filename": "isaac.csv",
+    "isaac_summary_filename": "isaac_summary.json",
+    "reference_csv_filename": "reference.csv",
+    "summary_plot_filename": "global_path_demo_v1.png",
+    "stage_filename": "global_path_demo_v1.usd"
+  }
+}
