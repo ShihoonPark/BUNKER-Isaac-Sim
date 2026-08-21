@@ -20,6 +20,7 @@ Isaac Sim based simulation, trajectory planning, and control project for the Agi
 - Stable V2 directional-force tracked-plant baseline validated in Isaac Sim/PhysX
 - Latest Bag C dense-map and accepted Bag D localization sync validated
 - Direction-Aware Controller V2 and the Multiple Closed-Loop Global Path Demo V1 validated
+- Real Global Path Tracking V1 offline/live-shadow software prepared without command publication
 
 ## Project Structure
 
@@ -41,6 +42,10 @@ isaac_bunker_project/
 │   ├── global_path_demo_visualization_v1.py
 │   ├── run_global_path_demo_v1.py
 │   ├── test_global_path_demo_v1.py
+│   ├── real_global_path_tracking_v1.py
+│   ├── run_real_global_path_tracking_shadow_v1.py
+│   ├── run_real_global_path_tracking_recorded_v1.py
+│   ├── test_real_global_path_tracking_v1.py
 │   └── run_isaac.sh
 ├── assets/
 └── logs/
@@ -129,6 +134,27 @@ python3 scripts/test_global_path_demo_v1.py --require-kinematic --require-isaac
 ~~~
 
 Outputs are written below the ignored `logs/global_path_demo_v1/<preset>/` directories. Passing this demo validates deterministic integration and nominal tracking in the current simulator; it does not establish real-robot calibration or simulator-to-real equivalence.
+
+## Real Global Path Tracking V1 — Shadow Only
+
+The real-tracking adapter reuses the existing `rounded_loop` reference builder and Direction-Aware Controller V2 with planar `T_map_lidar` feedback from `/localization/pose`. It evaluates both canonical-start and nearest-path attachment policies, preserves canonical simulation commands separately from initial real-safety-clamped candidates, and remains permanently `NOT_ARMABLE` in this stage. The live wrapper creates only a pose subscription; it contains no `/cmd_vel` publisher or actuator path.
+
+Shadow CSV rows carry an explicit `row_source`: `POSE_UPDATE` for localization callbacks, `STATUS_TIMER` for periodic safety/watchdog evaluation, and `RECORDED_POSE` for accepted Bag-D replay. All rows are retained for safety analysis, but future tracking-performance metrics must filter to `row_source == POSE_UPDATE` so timer re-evaluation cannot duplicate-weight a localization sample. Shadow V1 performs alignment and instantaneous command-candidate evaluation only; a physical trajectory clock, reference-progress execution, and lap execution remain a future Gate.
+
+Run the canonical accepted Bag-D offline interface/safety audit and its tests:
+
+~~~bash
+python3 scripts/run_real_global_path_tracking_recorded_v1.py
+python3 scripts/test_real_global_path_tracking_v1.py --require-recorded-output
+~~~
+
+For a later Jetson shadow session, after ROS 2 Humble and Live Real Localization V1 are running:
+
+~~~bash
+python3 scripts/run_real_global_path_tracking_shadow_v1.py --duration-s 20
+~~~
+
+The configured body, yaw-rate, track-speed, localization-age, and pose-jump values are `INITIAL SAFETY CAP / NOT CALIBRATED`. The exact `T_base_lidar`, start-alignment acceptance thresholds, explicit ARM supervisor, watchdog-backed command layer, and physical command publication remain future gates.
 
 ## Run the V2 Plant
 
