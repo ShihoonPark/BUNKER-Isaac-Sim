@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "description": "Pure offline trajectory-execution and command-safety preparation layered on frozen Real Global Path Tracking V1 Shadow Mode.",
+    "stage": "Real Global Path Execution & Safety V1 — OFFLINE ONLY",
+    "calibration_status": "INITIAL SAFETY GATE / NOT CALIBRATED. No physical-motion performance or safety certification is claimed.",
+    "physical_motion_enabled": false
+  },
+  "baseline_configs": {
+    "real_tracking_shadow": "config/real_global_path_tracking_v1.json",
+    "global_path_demo": "config/global_path_demo_v1.json",
+    "direction_aware_controller": "config/tracking_controller_v2_direction_aware.json"
+  },
+  "execution_plan": {
+    "preset": "rounded_loop",
+    "requested_laps": 1,
+    "canonical_builder_laps": 2,
+    "one_lap_adapter": "Use the existing canonical two-lap runtime. At each periodic-lap progress sample, retain the stricter of the first-lap launch envelope and second-lap terminal-stop envelope, then reuse the canonical timing/acceleration helper. Geometry, periodic speed limits, and dynamic limits remain unchanged.",
+    "default_start_mode": "START_POSE_MODE",
+    "nearest_path_mode_diagnostic_only": true,
+    "nearest_path_execution_enabled": false,
+    "motion_direction": 1
+  },
+  "initial_start_alignment_gate_not_calibrated": {
+    "status": "INITIAL SAFETY GATE / NOT CALIBRATED",
+    "maximum_start_xy_error_m": 0.10,
+    "maximum_start_heading_error_rad": 0.17453292519943295,
+    "rationale": "Provisional offline-only values make START_POSE_MODE decisions deterministic while keeping translation and heading independent. They are not measured stopping/tracking tolerances and must be reviewed with stationary live localization before any physical command Stage."
+  },
+  "deterministic_clock": {
+    "nominal_step_s": 0.02,
+    "require_strictly_forward_update_timestamp": true,
+    "terminal_reference_clamp": true,
+    "status_timer_advances_execution": false,
+    "watchdog_timeout_source": "initial_safety_envelope_not_calibrated.future_command_timeout_watchdog.timeout_s"
+  },
+  "state_machine": {
+    "states": ["DISARMED", "READY", "RUNNING", "STOPPING", "COMPLETE", "FAULT"],
+    "default_state": "DISARMED",
+    "ready_is_physical_arm": false,
+    "all_states_are_diagnostic_only": true,
+    "arm_state": "NOT_ARMABLE"
+  },
+  "real_safety_caps_frozen": {
+    "status": "INITIAL SAFETY CAP / NOT CALIBRATED",
+    "maximum_real_body_speed_m_s": 0.10,
+    "maximum_real_yaw_rate_rad_s": 0.20,
+    "maximum_real_track_speed_m_s": 0.12
+  },
+  "physical_execution_readiness": {
+    "reference_timing_ready": false,
+    "future_publisher_ready": false,
+    "status": "BLOCKED_PENDING_REAL_COMMAND_CALIBRATION",
+    "reason": "The canonical one-lap reference clock exceeds the provisional real-safe body, yaw-rate, and track-speed command envelope and must not be connected directly to a physical publisher.",
+    "diagnostic_policy": "Report the maximum of canonical peak divided by the corresponding provisional real-safe cap as a uniform time-scale lower bound. This proves the current clock is incompatible; it is not an optimized or validated physical trajectory timing.",
+    "next_stage_sequence": [
+      "measure physical command sign, deadzone, and speed capability",
+      "freeze the measured physical command envelope",
+      "generate a real-safe reference with the SAME rounded geometry and SAME trajectory-generation logic",
+      "execute that SAME real-safe reference in Isaac and Real",
+      "compare Sim Actual and Real Actual"
+    ]
+  },
+  "orderly_stop": {
+    "planned_stop_policy": "Use the canonical terminal deceleration envelope.",
+    "explicit_early_stop_policy": "Scale the already real-safe candidate toward zero using the unchanged canonical maximum deceleration; preserve the canonical and real-safe candidates as diagnostics.",
+    "deceleration_source": "trajectory_limits.maximum_deceleration_m_s2"
+  },
+  "command_output": {
+    "kind": "FINAL COMMAND CANDIDATE",
+    "diagnostic_only": true,
+    "create_command_publisher": false,
+    "publish_twist": false,
+    "reserved_future_topic": "/cmd_vel",
+    "physical_motion_enabled": false
+  },
+  "future_publisher_requirements": {
+    "implemented": false,
+    "independent_zero_twist_guarantees_required_for": [
+      "timeout",
+      "localization loss",
+      "Ctrl+C",
+      "exception",
+      "node shutdown",
+      "explicit E-stop or disarm"
+    ]
+  },
+  "output": {
+    "default_directory": "logs/real_global_path_execution_safety_v1",
+    "offline_csv_filename": "offline_one_lap.csv",
+    "offline_summary_filename": "offline_one_lap_summary.json",
+    "row_source_semantics": {
+      "POSE_UPDATE": "A future row generated directly by a /localization/pose callback; only this source may contribute independent samples to tracking-performance metrics.",
+      "STATUS_TIMER": "A non-progressing periodic safety/watchdog evaluation; preserve it but exclude it from tracking-performance weighting.",
+      "RECORDED_POSE": "A frozen Shadow V1 recorded-audit row; never treat it as rounded-loop tracking performance.",
+      "OFFLINE_SYNTHETIC": "A deterministic exact-reference pose used only by this offline execution/safety Gate; it is not real tracking performance."
+    },
+    "future_tracking_performance_filter": "row_source == POSE_UPDATE"
+  }
+}
