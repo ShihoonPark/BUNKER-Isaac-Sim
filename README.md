@@ -21,6 +21,7 @@ Isaac Sim based simulation, trajectory planning, and control project for the Agi
 - Latest Bag C dense-map and accepted Bag D localization sync validated
 - Direction-Aware Controller V2 and the Multiple Closed-Loop Global Path Demo V1 validated
 - Real Global Path Tracking V1 offline/live-shadow software prepared without command publication
+- Real Global Path Execution & Safety V1 deterministic one-lap and fault logic prepared offline
 
 ## Project Structure
 
@@ -46,6 +47,9 @@ isaac_bunker_project/
 │   ├── run_real_global_path_tracking_shadow_v1.py
 │   ├── run_real_global_path_tracking_recorded_v1.py
 │   ├── test_real_global_path_tracking_v1.py
+│   ├── real_global_path_execution_safety_v1.py
+│   ├── run_real_global_path_execution_offline_v1.py
+│   ├── test_real_global_path_execution_safety_v1.py
 │   └── run_isaac.sh
 ├── assets/
 └── logs/
@@ -155,6 +159,44 @@ python3 scripts/run_real_global_path_tracking_shadow_v1.py --duration-s 20
 ~~~
 
 The configured body, yaw-rate, track-speed, localization-age, and pose-jump values are `INITIAL SAFETY CAP / NOT CALIBRATED`. The exact `T_base_lidar`, start-alignment acceptance thresholds, explicit ARM supervisor, watchdog-backed command layer, and physical command publication remain future gates.
+
+## Real Global Path Execution & Safety V1 — Offline Only
+
+This additive layer consumes the frozen Shadow V1 context and implements a pure, ROS-independent state machine: `DISARMED → READY → RUNNING → STOPPING → COMPLETE`, with latched `FAULT` and explicit reset. `READY` is only software readiness for a future operator decision; every state remains `NOT_ARMABLE`. The pipeline stops at a diagnostic `FINAL COMMAND CANDIDATE`; neither the executor nor its runner imports a ROS command type, creates a command publisher, or publishes `/cmd_vel`.
+
+The first-session plan is `rounded_loop`, one lap, and `START_POSE_MODE`. `NEAREST_PATH_MODE` remains available for Shadow diagnostics but cannot prepare execution. Because the validated Global Path Demo builder structurally requires at least two laps, this layer does not introduce another profiler: at each canonical periodic progress sample it retains the stricter of the existing first-lap launch envelope and second-lap terminal-stop envelope, then reuses the canonical timing/acceleration helper. Rounded geometry, periodic limits, Controller V2, and the `0.10 m/s` body, `0.20 rad/s` yaw, and `0.12 m/s` track caps are unchanged.
+
+The provisional start limits (`0.10 m` XY and `10 deg` heading) are an `INITIAL SAFETY GATE / NOT CALIBRATED`, separate from controller tracking limits. They exist only to make offline state decisions deterministic and require stationary live-localization review. The explicit clock advances only on pose-update or offline-synthetic steps; `STATUS_TIMER` evaluates safety/watchdog state without advancing reference time. Future real tracking metrics must still use only `row_source == POSE_UPDATE`.
+
+Run the offline one-lap, ten-fault, sign, schema, and state-machine Gates:
+
+~~~bash
+python3 scripts/run_real_global_path_execution_offline_v1.py
+python3 scripts/test_real_global_path_execution_safety_v1.py --require-offline-output
+~~~
+
+The offline output below `logs/real_global_path_execution_safety_v1/` is ignored. Exact synthetic reference following validates execution and safety-decision semantics only; it is not real tracking performance, stopping-distance validation, or evidence that the provisional speed overcomes the physical BUNKER deadzone.
+
+Physical reference timing is explicitly `BLOCKED_PENDING_REAL_COMMAND_CALIBRATION`. The current canonical peaks (`0.60 m/s` body, `0.70 rad/s` yaw, `0.60 m/s` track) exceed the provisional real-safe caps (`0.10 m/s`, `0.20 rad/s`, `0.12 m/s`), producing body/yaw/track ratios of `6.0`, `3.5`, and `5.0`. Their maximum, `6.0x`, is only a minimum uniform time-scale diagnostic proving that the canonical clock is incompatible; it is not a proposed physical trajectory or timing solution. `reference_timing_ready` and `future_publisher_ready` therefore remain false.
+
+The next implementation direction is deliberately ordered: measure real command sign, deadzone, and speed capability; freeze the measured physical command envelope; use the same rounded geometry and same trajectory-generation logic to generate a real-safe reference; execute that same real-safe reference in both Isaac and Real; then compare Sim Actual with Real Actual. This Stage does not implement any of those steps and does not tune controller gains, geometry, or current safety caps.
+
+### Next real-session runbook — do not execute in this Stage
+
+1. Start and verify the BUNKER hardware drivers.
+2. Start Live Real Localization V1 from its separately frozen repository.
+3. Verify accepted `/localization/pose` is fresh `PoseStamped`, `frame_id=map`, with `T_map_lidar` semantics.
+4. Run Shadow V1 for 10–20 seconds and inspect pose freshness, jumps, alignment, and candidates.
+5. Confirm the ROS graph has no `/cmd_vel` publisher from the tracking/execution software.
+6. Use RC/manual control to place the stopped BUNKER near the rounded-loop canonical start.
+7. Re-run stationary localization and review raw start XY/heading and nearest-path diagnostics; calibrate/approve physical start thresholds separately.
+8. In a future explicitly reviewed command-publication Stage, run the physical `+v`, `+omega`, `-omega`, and stop sign-sanity Gate.
+9. Verify independent timeout, localization-loss, E-stop/disarm, exception, Ctrl+C, and shutdown zero-Twist behavior.
+10. Only after those Gates pass, run the rounded one-lap low-speed Gate with an operator and physical E-stop present.
+11. Record the ROS bag and pose-update tracking CSV with configuration/reference identity.
+12. Compare only independent `POSE_UPDATE` samples against the matching Isaac reference/run.
+
+Before any real motion, unresolved blockers remain: physical alignment limits are uncalibrated, command/deadzone and sign sanity have not been measured, and an independently reviewed publisher/ARM/watchdog layer with guaranteed zero Twist does not exist. Real-safe time parameterization and execution timing are not yet validated. The current `35.41 s` canonical one-lap clock must not be connected directly to the provisional `0.10 m/s` physical command envelope. Those items are intentionally outside this offline Stage.
 
 ## Run the V2 Plant
 
